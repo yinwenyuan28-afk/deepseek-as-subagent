@@ -177,8 +177,8 @@ def _validate_credential_storage(data: dict) -> None:
     ):
         raise RuntimeError(
             "Windows config files cannot store API keys safely; remove api_key "
-            "from config.json and set OPENAI_API_KEY or DEEPSEEK_API_KEY "
-            "in the process environment"
+            "from config.json and set OPENAI_API_KEY, COMMAND_API_KEY or "
+            "DEEPSEEK_API_KEY in the process environment"
         )
 
 
@@ -211,11 +211,27 @@ def _configured_api_key(data: dict) -> str:
 
 
 def _provider_api_key(endpoint: object, configured: str) -> str:
+    """Select the provider credential for an endpoint; environment wins over config.
+
+    Args:
+        endpoint: The normalized base_url, which decides which variables apply.
+        configured: The value from config.json's api_key field (always empty on
+            Windows, where persistent keys are rejected).
+
+    Returns:
+        The selected key. The caller validates that it is non-empty.
+
+    DeepSeek's own domain only accepts DEEPSEEK_API_KEY, so a credential meant
+    for another provider never reaches the official API. Custom endpoints accept
+    OPENAI_API_KEY and COMMAND_API_KEY, the explicit opt-in variables for
+    third-party gateways such as CommandCode.
+    """
     openai_key = os.getenv("OPENAI_API_KEY") or ""
+    command_key = os.getenv("COMMAND_API_KEY") or ""
     deepseek_key = os.getenv("DEEPSEEK_API_KEY") or ""
     if isinstance(endpoint, str) and _is_deepseek_endpoint(endpoint):
-        return deepseek_key or openai_key or configured
-    return openai_key or configured
+        return deepseek_key or openai_key or command_key or configured
+    return openai_key or command_key or configured
 
 
 def _load_api_key(data: dict, base_url: object | None = None) -> str:
@@ -236,8 +252,8 @@ def _load_api_key(data: dict, base_url: object | None = None) -> str:
     credential = _provider_api_key(endpoint, configured).strip()
     if not credential or credential == "PASTE_YOUR_DEEPSEEK_KEY_HERE":
         raise RuntimeError(
-            f"Provider API key not configured. Set OPENAI_API_KEY or DEEPSEEK_API_KEY "
-            f"or edit {CONFIG_PATH}"
+            f"Provider API key not configured. Set OPENAI_API_KEY, COMMAND_API_KEY "
+            f"or DEEPSEEK_API_KEY in the process environment, or edit {CONFIG_PATH}"
         )
     if not credential.startswith("sk-"):
         logger.warning("Provider API key does not start with 'sk-'; verify the key")

@@ -54,7 +54,8 @@ def probe():
         "uid": os.getuid(),
         "gid": os.getgid(),
         "provider_credentials": any(os.environ.get(k) for k in (
-            "DEEPSEEK_API_KEY", "OPENAI_API_KEY", "GITHUB_TOKEN", "GH_TOKEN"
+            "DEEPSEEK_API_KEY", "OPENAI_API_KEY", "COMMAND_API_KEY",
+            "GITHUB_TOKEN", "GH_TOKEN"
         )),
         "docker_socket": Path("/var/run/docker.sock").exists(),
         "workspace_readonly": readonly(source.parent),

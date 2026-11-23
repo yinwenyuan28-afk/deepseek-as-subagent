@@ -5,7 +5,9 @@ MCP-capable hosts such as Claude Code and Codex CLI.
 
 Environment variables:
   - DEEPSEEK_MODE=off: disable delegation for this process
-  - DEEPSEEK_API_KEY: override api_key from config.json
+  - DEEPSEEK_API_KEY: key for api.deepseek.com endpoints
+  - COMMAND_API_KEY: key for third-party gateways (e.g. CommandCode)
+  - OPENAI_API_KEY: generic key, also used for local endpoints that need auth
   - DEEPSEEK_WORKSPACE: override workspace from config.json
 """
 from __future__ import annotations

@@ -412,7 +412,7 @@ The selected API—not a task argument or model request—freezes that capabilit
 for the job lifetime.
 See [SECURITY.md](SECURITY.md) for boundaries and platform limitations.
 
-Override at runtime with env vars: `DEEPSEEK_API_KEY`, `OPENAI_API_KEY`, `DEEPSEEK_WORKSPACE`, `DEEPSEEK_MODE=off`.
+Override at runtime with env vars: `DEEPSEEK_API_KEY`, `OPENAI_API_KEY`, `COMMAND_API_KEY`, `DEEPSEEK_WORKSPACE`, `DEEPSEEK_MODE=off`.
 
 ## Uninstall
 

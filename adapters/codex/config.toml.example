@@ -23,6 +23,7 @@ default_tools_approval_mode = "writes"
 env_vars = [
   "DEEPSEEK_API_KEY",
   "OPENAI_API_KEY",
+  "COMMAND_API_KEY",
   "DEEPSEEK_WORKSPACE",
   "DEEPSEEK_MODE",
   "HTTP_PROXY",

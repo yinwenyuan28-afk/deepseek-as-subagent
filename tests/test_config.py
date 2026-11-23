@@ -365,6 +365,38 @@ class ConfigTests(unittest.TestCase):
                                     "OPENAI_API_KEY": "sk-custom"}, clear=True):
             self.assertEqual(_load_api_key({}, "https://models.example.com/v1"), "sk-custom")
 
+    def test_command_api_key_is_accepted_for_custom_endpoints(self) -> None:
+        """COMMAND_API_KEY must be usable for third-party gateways.
+
+        Covers four cases:
+        1. A custom https endpoint resolves COMMAND_API_KEY.
+        2. OPENAI_API_KEY still wins when both are present.
+        3. On the DeepSeek domain, DEEPSEEK_API_KEY wins over COMMAND_API_KEY.
+        4. On the DeepSeek domain without DEEPSEEK_API_KEY, COMMAND_API_KEY is
+           the fallback.
+        """
+        url = "https://api.commandcode.ai/provider/v1"
+        with patch.dict(os.environ, {"COMMAND_API_KEY": "user-cmd-key"}, clear=True):
+            self.assertEqual(_load_api_key({}, url), "user-cmd-key")
+
+        with patch.dict(
+            os.environ,
+            {"COMMAND_API_KEY": "user-cmd-key", "OPENAI_API_KEY": "sk-openai"},
+            clear=True,
+        ):
+            self.assertEqual(_load_api_key({}, url), "sk-openai")
+
+        deepseek_url = "https://api.deepseek.com/v1"
+        with patch.dict(
+            os.environ,
+            {"COMMAND_API_KEY": "user-cmd-key", "DEEPSEEK_API_KEY": "sk-deepseek"},
+            clear=True,
+        ):
+            self.assertEqual(_load_api_key({}, deepseek_url), "sk-deepseek")
+
+        with patch.dict(os.environ, {"COMMAND_API_KEY": "user-cmd-key"}, clear=True):
+            self.assertEqual(_load_api_key({}, deepseek_url), "user-cmd-key")
+
     def test_custom_provider_model_id_and_provider_default_reasoning_load(self) -> None:
         with tempfile.TemporaryDirectory() as tmpdir:
             config = Config._from_data(

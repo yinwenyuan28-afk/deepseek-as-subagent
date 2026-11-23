@@ -34,7 +34,7 @@ _IMAGE = re.compile(r"[A-Za-z0-9][A-Za-z0-9._/:+-]{0,255}@sha256:[0-9a-f]{64}\Z"
 
 
 def _validated_plan(config, raw_plan: object, image: str, timeout_seconds: int) -> SandboxTestPlan:
-    if any(os.environ.get(key) for key in ("DEEPSEEK_API_KEY", "OPENAI_API_KEY", "GITHUB_TOKEN", "GH_TOKEN")):
+    if any(os.environ.get(key) for key in ("DEEPSEEK_API_KEY", "OPENAI_API_KEY", "COMMAND_API_KEY", "GITHUB_TOKEN", "GH_TOKEN")):
         raise SandboxUnavailableError("hidden-test verifier must not receive provider or GitHub credentials")
     if getattr(config, "api_key", ""):
         raise SandboxUnavailableError("sandbox Config must not contain provider credentials")
