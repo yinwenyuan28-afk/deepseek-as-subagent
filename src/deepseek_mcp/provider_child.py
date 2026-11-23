@@ -12,7 +12,7 @@ from urllib.parse import urlsplit
 
 from .process_hardening import harden_provider_process
 from .parent_liveness import wait_for_parent_loss_or_timeout
-from .proxy_environment import sanitized_no_proxy_scope
+from .proxy_environment import repair_registry_proxy, sanitized_no_proxy_scope
 from .provider_settings import (
     DEFAULT_MAX_OUTPUT_TOKENS,
     is_deepseek_endpoint,
@@ -71,7 +71,12 @@ def _build_transport(base_url: str, request_timeout: float) -> httpx.Client:
     httpx reads the environment with no injection point, so the correction has
     to bracket the construction itself; without it a Docker Desktop style
     ``[::1]`` entry raised ``InvalidURL`` and the run died as ``category=client``.
+
+    Also repairs the Windows registry proxy first. Host agents usually export no
+    proxy variables, so httpx would read the registry, where urllib derives an
+    unusable ``https://127.0.0.1:7892`` from a plain ``127.0.0.1:7892`` entry.
     """
+    repair_registry_proxy()
     with sanitized_no_proxy_scope():
         return httpx.Client(
             timeout=_bounded_timeout(request_timeout),

@@ -23,7 +23,7 @@ from .provider_child import (
     MAX_RESPONSE_BYTES,
 )
 from .parent_liveness import ParentLiveness, close_parent_liveness
-from .proxy_environment import sanitize_environment
+from .proxy_environment import repair_registry_proxy, sanitize_environment
 from .provider_response import (
     ProviderContentFiltered,
     ProviderOutputTruncated,
@@ -176,6 +176,17 @@ def _log_child_failure(config, returncode: object, capture: _StderrCapture) -> N
 
 
 def _provider_environment() -> dict[str, str]:
+    """Build the environment whitelist handed to the provider child.
+
+    Returns:
+        Only network proxy variables, system directories, and a minimal PATH.
+
+    The registry proxy is repaired first. Host agents such as Codex and Claude
+    Code normally export no proxy variables, so without this the child would see
+    an empty proxy environment, fall back to the registry, and use the unusable
+    ``https://127.0.0.1:7897`` value urllib derives there.
+    """
+    repair_registry_proxy()
     environment = {name: os.environ[name] for name in _NETWORK_ENVIRONMENT if name in os.environ}
     for name in ("SYSTEMROOT", "WINDIR"):
         if name in os.environ:
